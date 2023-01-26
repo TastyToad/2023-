@@ -1,0 +1,127 @@
+#!/bin/bash 
+#
+
+#colors for output formating#
+BLUE='\033[0;34m'
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+CLEAR='\033[0m'
+#
+#
+#" Run as Root! "
+
+
+if [ $(whoami) != "root" ];then
+echo "Only root can run this script."
+  exit 1
+fi
+
+##############################
+#                            #
+#                            #
+#      Set the direcory      #
+dir="/var/www/html"          #
+#                            #
+#                            #
+##############################
+
+#List of dangerous functions/functions to look for in the directory 
+#limited to exact functions and is case sensative 
+
+############################################################################################
+#>>>>>> uncomment the one being used<<<<<<<<<#
+
+#dangerous_functions=( eval exec system passthru shell_exec popen proc_open pcntl_exec command assert )
+
+#dangerous_functious=( fsockopen pfsockopen stream_socket_client curl_init file_get_contents )
+
+#############################################################################################
+
+
+#search for PHP files in director
+for file in $(find $dir -name "*.php")
+
+    
+#checks for encoded PHP functions --  injection vulnerability -- 
+    do 
+
+    if grep -q -E "(eval\(|base64_decode\()" $file; then
+        echo
+        echo -e "Vulnerability found in ${RED} $file ${CLEAR}"
+        echo -n "   "
+        echo -e "${RED}possible obfuscation${CLEAR}"
+        echo
+    fi
+
+done
+
+   
+for file in $(find $dir -name "*.php")
+do
+  
+    # checks for functions in the "dangrous_functions" command 
+    for func in ${dangerous_functions[@]}
+    do
+        if grep -q -E "\b$func\b" $file ; then
+             echo -e "PossiBLE Dangerous function ${RED}'$func'${CLEAR} found in $file $Clear"
+             echo 
+        fi
+    done
+done
+
+
+#other things to consider  
+
+###################################################################
+#check for hidden files and processes that have been unlinked     #
+################################################################################
+#“link count” of 0, meaning there is no directory entry                        #
+#(no link, i.e. no name,no directory) that leads to them, but the file data still exists.   #
+#                                                                              #
+#processes can still write data to the files ----sometimes used by malware     #
+################################################################################
+
+#lsof +L1
+
+
+
+##################################
+#check for listening connections #
+##################################
+
+#netstat -tuln 
+#netstat -tuln | grep -v "127.0.0.1"
+
+
+
+######################################################
+#check  processes   #
+######################################################
+
+#ps auxf 
+#ps auxf | grep -v "grep"
+
+
+############################################
+#modules with vulnerabilies in the past    #
+############################################
+ 
+
+
+
+##############################################################################################
+#SQL injection vulnerability On older versions of Presta shop 
+
+#locate the file config/smarty.config.inc.php remove lines 43-46 (PrestaShop 1.7) or 40-43 (PrestaShop 1.6):
+##############################################################################################
+#if (Configuration::get('PS_SMARTY_CACHING_TYPE') == 'mysql') {
+#    include _PS_CLASS_DIR_.'Smarty/SmartyCacheResourceMysql.php';
+#    $smarty->caching_type = 'mysql';
+#}
+
+
+
+#/modules/explorerpro/action.php
+#/modules/sampledatainstall/sampledatainstall-ajax.php
+#/modules/colorpictures/ajax/upload.php
+                                        
