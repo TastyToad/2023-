@@ -5,7 +5,7 @@
 #Make sure the script is run as root
 
 if [ $(whoami) != "root" ];then
-echo "Only root can run this script."
+echo "run a root."
   exit 1
 fi
 
@@ -44,17 +44,20 @@ while read -r user;do
   printf "$(id $user)"
   echo 
   echo -n  "     " 
-  grep $user /etc/sudoers| grep -v "This file MUST be edited with the 'visudo' command as root.\|This preserves proxy settings from user environments of root\|While you shouldn't normally run git as root, you need to with etckeeper\|Per-user preferences; root won't have sensible values for them."
+  grep $user /etc/sudoers| grep -v 
   echo 
-  echo "check permission of /etc/passwd :"
+  echo "check permision of /etc/passwd :"
   ls -ld /etc/passwd
   echo
-  echo "check permission of /etc/shadow :"
+  
+  echo "check permissions of /etc/shadow :"
   ls -ld /etc/shadow
   echo
+  
   echo "check permission of /var/log :"
   ls -ld /var/log
   echo
+  
   permissions=$(ls -ld /home/$user)
   echo "Home directory permissions: $permissions"
 
@@ -107,3 +110,9 @@ while read -r user; do
   fi
 echo   
 done < /tmp/invalid_users.txt
+
+
+##########add removal of temp files 
+
+#later 
+
