@@ -1,0 +1,48 @@
+#!/bin/bash 
+
+if [ $(whoami) != root ];then
+        echo "run as root silly" 
+        exit 1
+fi
+
+#this only works for users in the sudoers file, not sudoers.d , does not look at groups 
+
+#######################
+# get a lsit of users #
+#######################
+#users will be stored in a tmp file: /var/tmp/User_.....txt
+#
+cut -d: -f 1 /etc/passwd > /var/tmp/User_list.txt
+   
+grep -e '#' -v /etc/sudoers | grep Defaults -v |grep -e "%" -v | grep -e "^$" -v |grep -e "@" -v | awk '{print $1}' > /var/tmp/Users_list2.txt  #lol i forgot how to include more than one at a time 
+
+#COMPARE LISTS OF USERS TO FIND OUT WHAT USERS ARE SUDOERS 
+while read -r user; do
+    found=0
+    while read -r user2; do
+        if [ "$user" == "$user2" ]; then
+            echo "User: $user is a sudoer"
+            found=1
+            break
+        fi
+    done < /var/tmp/Users_list2.txt
+    if [ "$found" == "0" ]; then
+        echo
+        echo "User: $user is not a sudoer"
+        echo "User: "$user" can be expired"
+        echo 
+          
+    fi
+done < /var/tmp/User_list.txt
+
+
+
+
+
+function Auto_remove {
+shred -u "${/home/kali/Tools/User_mgmt}"
+}
+
+
+trap "rm -f /var/tmp/User_list.txt" EXIT
+trap "rm -f /var/tmp/Users_list2.txt" EXIT 
