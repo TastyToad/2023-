@@ -12,7 +12,7 @@ client_auth = requests.auth.HTTPBasicAuth(CLIENT, SECRET)
 post_data = {'grant_type' : 'password', 'username':USERNAME, 'password':PASSWORD}
 headers = {
     
-    'User-Agent' : "scripty 1234todoty"
+    'User-Agent' : "      "
 }
 
 #getting token access id 
