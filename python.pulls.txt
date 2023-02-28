@@ -1,0 +1,62 @@
+import os
+import subprocess
+import time
+
+encoding = "utf-8"
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>change origin name to origin name on the server. the origin on my test enviremonet is using us as alias <<<<<<<<<<<<<<<<<<<<<<<<<<
+origin = 'us'
+
+#this implementation is not strictly nessesary. it could be declared witin the gitlab pipline 
+#im doign this to keep the pipline activity time to a minimum.  #the more we have within the pipline the faster we will run out of time.
+#it also looks better to have the pipleine clean 
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>change this to the .git projct directory on the runner <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+correct_path = '/home/capstone/Capstone-Project'
+
+#you should not have to change this. it checks the current directory . if the directory is not set to the project directoy it chenges it 
+def Correct_Path():
+    cwd = os.getcwd()
+    print('\nThe Current working directory is:{0}\n'.format(cwd))
+    if (cwd != correct_path):
+        print("*************NOT the project directory***************\n\n*******Changing this to: {0}/*******\n".format(correct_path))
+        os.chdir(correct_path)
+        print ('********Directory is now {0}/********\n'.format(os.getcwd()))
+        return True
+
+#if this is workign correctly it will pull from the dev branch and update the local repo. 
+#git likes to thow errors over stupid #### ,  save the error and let me know what it is.  or fix it if you know how  and update the repo
+def Pull_Dev ():
+    print ("\n*Attempting to Pull Dev Branch*\n")
+    proc = subprocess.Popen(["git","status"], stdout=subprocess.PIPE, stderr=subprocess.PIPE); print(proc.stderr.read().decode(encoding),"\n","****************************")
+    #proc.wait()
+    print (proc.stdout.read().decode(encoding))
+    print ("******************************")
+    subprocess.Popen(["git", "pull", origin , "main"], stdout=subprocess.PIPE , stderr=subprocess.PIPE) ; print(proc.stderr.read().decode(encoding),'\n')
+    #proc.wait()
+    print (proc.stdout.read().decode(encoding))
+def Pull_Main ():
+    print ("*Attempting to Pull Main Branch*\n")
+    proc = subprocess.Popen(["git","status"], stdout=subprocess.PIPE, stderr=subprocess.PIPE); print(proc.stderr.read().decode(encoding),"\n","****************************")
+    #proc.wait()
+    print (proc.stdout.read().decode(encoding))
+    print ("******************************")
+    subprocess.Popen(["git", "pull", origin , "main"], stdout=subprocess.PIPE , stderr=subprocess.PIPE) ; print(proc.stderr.read().decode(encoding),'\n')
+    #proc.wait()
+    print (proc.stdout.read().decode(encoding))
+
+
+if Correct_Path() == True:
+    #validate we are still in correct drectory 
+    #print('{0}'.format(os.getcwd()))
+    proc = subprocess.Popen(["git", "checkout", "Development"], stdout=subprocess.PIPE , stderr=subprocess.PIPE ) ; proc.wait(); print(proc.stderr.read().decode(encoding),'\n')
+    print (proc.stdout.read().decode(encoding),'\n')
+    if (proc.stdout.read().decode(encoding) == "Already on 'Development'"):
+        Pull_Dev()
+    else:
+        proc = subprocess.Popen(["git", "checkout", "Development"], stdout=subprocess.PIPE , stderr=subprocess.PIPE ) ; proc.wait()
+        Pull_Dev()
+    
+    proc = subprocess.Popen(["git", "checkout", "main"], stdout=subprocess.PIPE , stderr=subprocess.PIPE ) ; proc.wait(); check=True;print(proc.stderr.read().decode(encoding)); print(proc.stdout.read().decode(encoding),'\n')
+    print ('pulling  main ')
+    Pull_Main()
+        
